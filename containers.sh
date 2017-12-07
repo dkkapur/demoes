@@ -46,7 +46,7 @@ set -x #echo on
 
 sfctl application upload --path $appFolder$version2 --show-progress
 sfctl application provision --application-type-build-path $appFolder$version2 
-sfctl application upgrade --application-name fabric:/ContainerApplication --application-version 2.0.0 --mode UnmonitoredAuto --parameters {}
+sfctl application upgrade --app-id 'fabric:/ContainerApplication' --app-version 2.0.0 --mode UnmonitoredAuto --parameters {}
 
 
 set +x #echo off
