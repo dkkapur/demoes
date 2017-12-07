@@ -1,27 +1,27 @@
-#!/bin/zsh
-clusterName=$1
-appFolder=$2
+#!/bin/bash
+clusterName="demolinuxsecure.westus.cloudapp.azure.com"
+appFolder="SimpleContainerAppL"
 version2="V2"
 
 set -x #echo on
 
-sfctl cluster select --endpoint http://$clusterName:19080
+sfctl cluster select --endpoint https://$clusterName:19080 --pem $1 --no-verify
 sfctl application upload --path $appFolder --show-progress
 sfctl application provision --application-type-build-path $appFolder
 sfctl application create --app-name fabric:/ContainerApplication --app-type SimpleContainerAppType --app-version 1.0.0
-sfctl service create --name fabric:/ContainerApplication/nodejsFrontEnd --service-type nodejsfrontendType --stateless --instance-count 1 --app-id ContainerApplication  --singleton-scheme --constraints "NodeType == RedVM"
-sfctl service create --name fabric:/ContainerApplication/pythonBackEnd --service-type pythonbackendType --stateless --instance-count 1 --app-id ContainerApplication  --dns-name pythonbackend.simplecontainerapp --singleton-scheme --constraints "NodeType == RedVM"
+sfctl service create --name fabric:/ContainerApplication/nodejsFrontEnd --service-type nodejsfrontendType --stateless --instance-count 1 --app-id ContainerApplication  --singleton-scheme --constraints "NodeType == BackEnd"
+sfctl service create --name fabric:/ContainerApplication/pythonBackEnd --service-type pythonbackendType --stateless --instance-count 1 --app-id ContainerApplication  --dns-name pythonbackend.simplecontainerapp --singleton-scheme --constraints "NodeType == FrontEnd"
 
 set +x #echo off
-echo "\n\nPress any key to fix placement constraints\n\n"
+echo "Press any key to fix placement constraints"
 read
 set -x #echo on
 
-sfctl service update --service-id ContainerApplication/nodejsFrontEnd --constraints "NodeType == BlueVM" --stateless
-sfctl service update --service-id ContainerApplication/pythonBackEnd --constraints "NodeType == RedVM" --stateless
+sfctl service update --service-id ContainerApplication/nodejsFrontEnd --constraints "NodeType == FrontEnd" --stateless
+sfctl service update --service-id ContainerApplication/pythonBackEnd --constraints "NodeType == BackEnd" --stateless
 
 set +x #echo off
-echo "\n\nPress any key to scale up\n\n"
+echo "Press any key to scale up"
 read
 set -x #echo on
 
@@ -31,7 +31,7 @@ sfctl service update --service-id ContainerApplication/pythonBackEnd --instance-
 
 set +x #echo off
 echo 
-echo "\n\nPress any key to scale back down\n\n"
+echo "Press any key to scale back down"
 read
 set -x #echo on
 
@@ -46,11 +46,11 @@ set -x #echo on
 
 sfctl application upload --path $appFolder$version2 --show-progress
 sfctl application provision --application-type-build-path $appFolder$version2 
-sfctl application upgrade --app-id fabric:/ContainerApplication --app-version 2.0.0 --mode UnmonitoredAuto --parameters {}
+sfctl application upgrade --application-name fabric:/ContainerApplication --application-version 2.0.0 --mode UnmonitoredAuto --parameters {}
 
 
 set +x #echo off
-echo "\n\nPress any key to clean up\n\n"
+echo "Press any key to clean up"
 read
 set -x #echo on
 
